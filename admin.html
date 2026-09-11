@@ -1,0 +1,111 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ImpactCal admin — ADONI TECH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="icon" href="favicon.png"><link rel="stylesheet" href="style.css">
+</head><body>
+<header class="noprint"><div class="wrap">
+  <div class="logo">adoni<span>Tech</span></div>
+  <div class="sub">ImpactCal<br>Admin console</div>
+  <nav>
+    <button data-v="rfq" class="on">RFQ queue</button>
+    <button data-v="quotes">Quotations</button>
+    <button data-v="price">Pricelist</button>
+    <button data-v="cad">CAD library</button>
+    <button data-v="settings">Settings</button>
+    <a href="index.html">Selector</a>
+  </nav>
+</div></header>
+
+<div class="wrap">
+  <div id="keyBar" class="card noprint">
+    <h3>Admin key</h3>
+    <p class="hint">Set <code>IMPACTCAL_ADMIN_KEY</code> when you start the server. Stored in this browser only.</p>
+    <div class="row"><div style="flex:1 1 260px"><input id="akey" type="password" placeholder="admin key"></div>
+      <button class="btn" id="akeySave">Unlock</button></div>
+  </div>
+
+  <!-- RFQ queue -->
+  <section data-view="rfq" class="hidden">
+    <div class="card"><div class="spread"><h3>RFQ queue</h3>
+      <div class="row"><select id="rfqFilter"><option value="">All</option><option value="new">New</option>
+        <option value="quoted">Quoted</option><option value="cad_pending">Awaiting CAD</option>
+        <option value="closed">Closed</option><option value="lost">Lost</option></select>
+      <button class="btn ghost sm" id="rfqRefresh">Refresh</button></div></div>
+      <div class="tw" style="margin-top:12px;max-height:420px"><table id="rfqTbl">
+        <thead><tr><th>RFQ</th><th>Date</th><th>Customer</th><th>GSTIN</th><th>State</th><th>Project</th>
+          <th class="n">Items</th><th>Formats</th><th>Status</th><th>Quotation</th><th></th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div id="rfqDetail"></div>
+  </section>
+
+  <!-- quotations -->
+  <section data-view="quotes" class="hidden">
+    <div class="card noprint"><div class="spread"><h3>Quotations</h3><button class="btn ghost sm" id="qRefresh">Refresh</button></div>
+      <div class="tw" style="margin-top:12px;max-height:320px"><table id="qTbl">
+        <thead><tr><th>Number</th><th class="n">Rev</th><th>Date</th><th>Customer</th><th>Supply</th>
+          <th class="n">Total ₹</th><th>Status</th><th></th></tr></thead><tbody></tbody></table></div></div>
+    <div id="quoteEditor"></div>
+  </section>
+
+  <!-- pricelist -->
+  <section data-view="price" class="hidden">
+    <div class="card"><div class="spread"><h3>Pricelist</h3>
+      <div class="row">
+        <a class="btn ghost sm" id="dlXlsx" href="#">Download .xlsx</a>
+        <label class="btn ghost sm" style="margin:0;cursor:pointer">Upload .xlsx
+          <input type="file" id="upXlsx" accept=".xlsx,.xls" class="hidden"></label>
+        <button class="btn sm" id="savePrice" disabled>Save changes</button>
+      </div></div>
+      <p class="hint">Click any yellow cell and type. Paste a block straight from Excel — it fills across and down from the cell you are on.
+        Changed cells turn orange until you save.</p>
+      <div class="row" style="margin:10px 0">
+        <div><label>Series</label><select id="fSeries"><option value="">All</option></select></div>
+        <div style="flex:1 1 200px"><label>Search model</label><input id="fQ" placeholder="AKHG 100"></div>
+        <div><label>&nbsp;</label><button class="btn ghost" id="fGo">Filter</button></div>
+      </div>
+      <div id="priceMsg"></div>
+      <div class="tw grid-edit" style="max-height:560px"><table id="priceTbl">
+        <thead><tr><th>Model</th><th>Series</th><th class="n">Stroke</th><th class="n">Nm/cycle</th><th class="n">Nm/h</th>
+          <th>HSN</th><th class="n">GST %</th><th>UOM</th><th class="n">List price ₹</th><th class="n">Lead days</th>
+          <th>Status</th><th>Note</th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="card"><h3>Accessories</h3>
+      <div class="tw grid-edit"><table id="accTbl">
+        <thead><tr><th>Code</th><th>Name</th><th>Kind</th><th>HSN</th><th class="n">GST %</th>
+          <th class="n">Price ₹</th><th>Status</th></tr></thead><tbody></tbody></table></div></div>
+  </section>
+
+  <!-- cad -->
+  <section data-view="cad" class="hidden">
+    <div class="card"><h3>Upload CAD</h3>
+      <p class="hint">Files are held privately. Nothing reaches a customer until you release it against an RFQ.</p>
+      <div class="grid">
+        <div><label>Product</label><input id="cadBk" list="bkList" placeholder="type a model"><datalist id="bkList"></datalist></div>
+        <div><label>Mounting</label><input id="cadMount" placeholder="Front flange"></div>
+        <div><label>Revision</label><input id="cadRev" value="A"></div>
+        <div><label>Files</label><input id="cadFiles" type="file" multiple></div>
+      </div>
+      <div class="row" style="margin-top:12px"><button class="btn" id="cadUp">Upload</button></div>
+      <div id="cadMsg"></div>
+      <div class="tw" style="margin-top:14px;max-height:400px"><table id="cadTbl">
+        <thead><tr><th>File</th><th>Model</th><th>Mounting</th><th>Format</th><th class="n">Size</th><th>Uploaded</th></tr></thead>
+        <tbody></tbody></table></div></div>
+  </section>
+
+  <!-- settings -->
+  <section data-view="settings" class="hidden">
+    <div class="card"><h3>Settings</h3>
+      <p class="hint">Company details print on every quotation. Engine constants change how selection behaves.</p>
+      <div id="setForm" class="grid"></div>
+      <div class="row" style="margin-top:14px"><button class="btn" id="setSave">Save settings</button></div>
+      <div id="setMsg"></div>
+    </div>
+    <div class="card"><h3>Recent activity</h3>
+      <div class="tw" style="max-height:300px"><table id="auditTbl">
+        <thead><tr><th>When</th><th>Who</th><th>What</th><th>Ref</th><th>Detail</th></tr></thead><tbody></tbody></table></div></div>
+  </section>
+</div>
+<script src="admin.js"></script>
+</body></html>
