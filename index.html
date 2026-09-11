@@ -1,0 +1,106 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ImpactCal — Shock absorber &amp; crane buffer selection | ADONI TECH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="icon" href="favicon.png"><link rel="stylesheet" href="style.css">
+</head><body>
+<header><div class="wrap">
+  <div class="logo">adoni<span>Tech</span></div>
+  <div class="sub">ImpactCal<br>Selection &amp; RFQ Suite</div>
+  <nav>
+    <button id="tabCrane" class="on">Crane buffers</button>
+    <button id="tabInd">Industrial shock absorbers</button>
+    <a href="admin.html">Admin</a>
+  </nav>
+</div></header>
+
+<div class="wrap">
+  <div class="steps">
+    <div class="step on" data-s="1"><span class="n">1</span><span><b>Project</b><small>name · customer</small></span></div>
+    <div class="step" data-s="2"><span class="n">2</span><span><b>Application</b><small>case · standard</small></span></div>
+    <div class="step" data-s="3"><span class="n">3</span><span><b>Duty</b><small>mass · speed · cycles</small></span></div>
+    <div class="step" data-s="4"><span class="n">4</span><span><b>Results</b><small>ranked selection</small></span></div>
+    <div class="step" data-s="5"><span class="n">5</span><span><b>Request</b><small>RFQ &amp; drawings</small></span></div>
+  </div>
+
+  <!-- 1 project -->
+  <section class="card" data-p="1">
+    <h3>Project details</h3>
+    <p class="hint">Saved in this browser. Email and phone are needed only when you send the request.</p>
+    <div class="grid">
+      <div><label>Project name</label><input id="pname" placeholder="e.g. Bay 3 gantry — end stops"></div>
+      <div><label>Customer / company</label><input id="pcust" placeholder="e.g. Kirloskar Brothers Ltd."></div>
+      <div><label>Contact person</label><input id="pcontact"></div>
+      <div><label>Reference no.</label><input id="pref" placeholder="AT/CB/2026/xx"></div>
+      <div><label>Equipment</label><input id="pequip" placeholder="e.g. 20 t EOT crane, 22 m span"></div>
+      <div><label>Prepared by</label><input id="pby"></div>
+      <div><label>Email</label><input id="pemail" type="email"></div>
+      <div><label>Phone / WhatsApp</label><input id="pphone"></div>
+      <div><label>GSTIN <span class="muted">(for the quotation)</span></label><input id="pgstin" placeholder="27AAAAA0000A1Z5" maxlength="15" style="text-transform:uppercase"></div>
+    </div>
+    <div id="gstinMsg"></div>
+    <div class="row" style="margin-top:14px"><button class="btn" data-go="2">Next: application →</button>
+      <button class="btn ghost" id="loadExample">Load a worked example</button></div>
+  </section>
+
+  <!-- 2 application -->
+  <section class="card hidden" data-p="2">
+    <h3>Application and governing standard</h3>
+    <p class="hint">The standard sets the design speed and the deceleration limit. It is printed on the report.</p>
+    <div class="grid">
+      <div><label>Impact case</label><select id="caseId"></select></div>
+      <div><label>Governing standard</label><select id="standard"></select></div>
+      <div><label>Restrict to series <span class="muted">(optional)</span></label><select id="series" multiple size="4"></select></div>
+    </div>
+    <div id="stdNote" class="note blue"></div>
+    <div class="row"><button class="btn ghost" data-go="1">← Back</button><button class="btn" data-go="3">Next: duty →</button></div>
+  </section>
+
+  <!-- 3 duty -->
+  <section class="card hidden" data-p="3">
+    <h3>Duty data</h3>
+    <p class="hint">MKS units. Only the fields your case needs are shown.</p>
+    <div class="grid" id="dutyFields"></div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn ghost" data-go="2">← Back</button>
+      <button class="btn" id="calc">Calculate and select →</button>
+    </div>
+  </section>
+
+  <!-- 4 results -->
+  <section class="card hidden" data-p="4">
+    <div class="spread"><h3>Selection</h3><div id="picks"></div></div>
+    <div id="dutyOut"></div>
+    <div class="tw" style="max-height:520px"><table id="resTbl">
+      <thead><tr><th></th><th>Model</th><th>Series</th><th class="n">Stroke mm</th><th class="n">Nm/cycle</th>
+        <th class="n">Nm/h</th><th class="n">Use /str</th><th class="n">Use /h</th><th class="n">Decel m/s²</th>
+        <th class="n">Force kN</th><th class="n">Eff. mass kg</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
+    <div class="row" style="margin-top:14px"><button class="btn ghost" data-go="3">← Back</button>
+      <button class="btn" id="toRfq" disabled>Request drawings &amp; quotation →</button>
+      <button class="btn ghost" id="printReport">Print calculation report</button></div>
+  </section>
+
+  <!-- 5 rfq -->
+  <section class="card hidden" data-p="5">
+    <h3>Request drawings and quotation</h3>
+    <p class="hint">Your selection and calculation are attached. CAD files are released by ADONI TECH after review — usually within one working day.</p>
+    <div id="rfqLines"></div>
+    <div class="grid" style="margin-top:14px">
+      <div><label>Quantity per position</label><input id="rqty" type="number" value="2" min="1"></div>
+      <div><label>Mounting</label><select id="rmount"></select></div>
+      <div><label>Rod end</label><select id="rcap"></select></div>
+      <div><label>Drawing formats</label><select id="rfmt" multiple size="5">
+        <option value="PDF" selected>PDF (2D dimensioned)</option><option value="DXF">DXF</option>
+        <option value="DWG">DWG</option><option value="STEP" selected>STEP (3D)</option><option value="IGES">IGES (3D)</option>
+      </select></div>
+    </div>
+    <div style="margin-top:12px"><label>Message</label><textarea id="rmsg" rows="3" placeholder="Anything else we should know — ambient temperature, duty cycle, mounting constraints…"></textarea></div>
+    <div class="row" style="margin-top:14px"><button class="btn ghost" data-go="4">← Back</button>
+      <button class="btn" id="sendRfq">Send request</button></div>
+    <div id="rfqOut"></div>
+  </section>
+</div>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body></html>
