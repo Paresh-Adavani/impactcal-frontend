@@ -1,4 +1,6 @@
-:root{
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ImpactCal — series picture menu preview</title><style>:root{
   --brand:#F57C00; --brand-d:#D96A00; --brand-l:#FF9A33; --brand-xl:#FFF3E6;
   --blue:#467FF7; --blue-d:#2E63D4; --blue-l:#E4EDFE; --navy:#1B3160; --sky:#6EC1E4;
   --ink:#333; --ink-2:#5A6672; --ink-3:#8B96A3;
@@ -188,3 +190,60 @@ table.kv.cols2 td:nth-child(even),table.kv.cols3 td:nth-child(even){margin-left:
   @page{size:A4 portrait;margin:14mm 13mm}
   .rpt-sec,.rpt-tbl tr,table.kv tr{break-inside:avoid}
 }
+</style></head>
+<body style="padding:22px;background:var(--bg)">
+<div class="card" style="max-width:1100px;margin:0 auto">
+<h3>Restrict to series <span class="muted">(preview of the new picture menu)</span></h3>
+<p class="hint">Click the pictures of the families you want. Up to 3. Leave them unpicked to search the whole catalogue.</p>
+<div class="seriesbar"><span class="count" id="seriesCount"></span>
+  <button class="btn ghost sm" type="button" id="seriesClear">Clear</button></div>
+<div id="seriesGrid" class="picker series"></div>
+<div class="grid" style="margin-top:16px;max-width:640px">
+  <div><label>Restrict to series <span class="muted">(list, same setting)</span></label>
+  <select id="series" multiple size="4"></select></div>
+</div>
+</div>
+<script>
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const S = {}, save = () => {};
+const META = { series: [{series: 'AC', n: 32}, {series: 'ACX', n: 10}, {series: 'AD', n: 27}, {series: 'AKHG', n: 65}, {series: 'AKHS', n: 7}, {series: 'ED', n: 77}, {series: 'EI', n: 32}, {series: 'JHQC', n: 24}, {series: 'SB', n: 21}, {series: 'YSRA', n: 4}] };
+const CB_IMG = 'https://www.cranebuffer.com/wp-content/uploads/';
+const AT_IMG = 'https://www.adonitech.co.in/wp-content/uploads/';
+/* picture, what the family is, one line on how it works */
+const SERIES_ART = {
+  AC  :[AT_IMG+'2026/02/precision__3___1_-removebg-preview.png','Fixed damping',
+        'Self-compensating. Damping set at the factory — pick the code 0–4 to suit the load.'],
+  ACX :[AT_IMG+'2024/12/Industrial-Shock-Absorbers-2-300x200.png','Fixed damping, extended',
+        'Self-compensating, more energy per cycle in the same thread size.'],
+  AD  :[AT_IMG+'2025/03/DSC_2230-removebg-preview-1-1-212x300.png','Adjustable damping',
+        'Damping set on installation by turning the adjustment ring.'],
+  YSRA:[AT_IMG+'2025/01/industrial-shock-absorber-two-locknuts-221x300.jpg','Hydraulic, small bore',
+        'Compact threaded hydraulic absorber, mounted with locknuts.'],
+  AKHG:[CB_IMG+'2025/01/adonitech__7_-220x300.jpg','Hydraulic, nitrogen return',
+        'Heavy crane buffer. A nitrogen chamber pushes the rod back out after impact.'],
+  AKHS:[CB_IMG+'2025/02/adonitech__7___2_-removebg-preview.png','Hydraulic, spring return',
+        'Heavy crane buffer. A return spring replaces the gas chamber.'],
+  ED  :[CB_IMG+'2025/01/1-removebg-preview-300x200.png','Hydraulic crane buffer',
+        'Heavy-duty buffer for crane and wagon end stops.'],
+  EI  :[CB_IMG+'2025/01/adonitech__7_-1.jpg','Hydraulic crane buffer',
+        'Industrial-duty buffer for travelling machinery.'],
+  SB  :[CB_IMG+'2025/02/IMG-20250211-WA0009-221x300.jpg','Steel coil spring',
+        'Spring buffer. Stores the energy and gives it back — efficiency 0.50.'],
+  JHQC:[CB_IMG+'2026/01/1111-300x249.jpg','Polyurethane, non-metallic',
+        'Bolted elastomer pad, no moving parts — efficiency 0.158.'],
+};
+const SERIES_MAX = 3;
+/* ---------------- series picture menu (pick up to 3) ---------------- */
+function selectedSeries() { return [...$('#series').selectedOptions].map(o => o.value); }
+function setSeries(list) {
+  const keep = [...new Set(list)].slice(0, SERIES_MAX);
+  [...$('#series').options].forEach(o => { o.selected = keep.includes(o.value); });
+  S.series = keep; save(); drawSeries();
+}
+
+$('#series').innerHTML = META.series.map(s => `<option value="${s.series}">${s.series} (${s.n})</option>`).join('');
+$('#series').onchange = () => setSeries(selectedSeries());
+$('#seriesClear').onclick = () => setSeries([]);
+setSeries([]);
+</script></body></html>

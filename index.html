@@ -1,12 +1,13 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ImpactCal — Shock absorber &amp; crane buffer selection | ADONI TECH</title>
+<link rel="icon" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="icon" href="favicon.png"><link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=202608251359">
 </head><body>
-<header><div class="wrap">
-  <div class="logo">adoni<span>Tech</span></div>
+<header class="noprint"><div class="wrap">
+  <img src="img/logo.png" alt="ADONI TECH" class="brandmark">
   <div class="sub">ImpactCal<br>Selection &amp; RFQ Suite</div>
   <nav>
     <button id="tabCrane" class="on">Crane buffers</button>
@@ -15,10 +16,10 @@
   </nav>
 </div></header>
 
-<div class="wrap">
+<div class="wrap noprint">
   <div class="steps">
     <div class="step on" data-s="1"><span class="n">1</span><span><b>Project</b><small>name · customer</small></span></div>
-    <div class="step" data-s="2"><span class="n">2</span><span><b>Application</b><small>case · standard</small></span></div>
+    <div class="step" data-s="2"><span class="n">2</span><span><b>Application</b><small>pick the picture</small></span></div>
     <div class="step" data-s="3"><span class="n">3</span><span><b>Duty</b><small>mass · speed · cycles</small></span></div>
     <div class="step" data-s="4"><span class="n">4</span><span><b>Results</b><small>ranked selection</small></span></div>
     <div class="step" data-s="5"><span class="n">5</span><span><b>Request</b><small>RFQ &amp; drawings</small></span></div>
@@ -46,12 +47,17 @@
 
   <!-- 2 application -->
   <section class="card hidden" data-p="2">
-    <h3>Application and governing standard</h3>
-    <p class="hint">The standard sets the design speed and the deceleration limit. It is printed on the report.</p>
-    <div class="grid">
-      <div><label>Impact case</label><select id="caseId"></select></div>
+    <h3>Which of these is your application?</h3>
+    <p class="hint">Click the picture that matches. The governing standard sets the design speed and the deceleration limit.</p>
+    <div id="caseGrid" class="picker"></div>
+    <h4 class="seriesh">Restrict to series <span class="muted">(optional — pick up to 3)</span></h4>
+    <p class="hint">Click the pictures of the families you want. Leave them all unpicked to search the whole catalogue.</p>
+    <div class="seriesbar"><span class="count" id="seriesCount"></span>
+      <button class="btn ghost sm" type="button" id="seriesClear">Clear</button></div>
+    <div id="seriesGrid" class="picker series"></div>
+    <div class="grid" style="margin-top:16px;max-width:640px">
       <div><label>Governing standard</label><select id="standard"></select></div>
-      <div><label>Restrict to series <span class="muted">(optional)</span></label><select id="series" multiple size="4"></select></div>
+      <div><label>Restrict to series <span class="muted">(list, same setting)</span></label><select id="series" multiple size="4"></select></div>
     </div>
     <div id="stdNote" class="note blue"></div>
     <div class="row"><button class="btn ghost" data-go="1">← Back</button><button class="btn" data-go="3">Next: duty →</button></div>
@@ -59,8 +65,9 @@
 
   <!-- 3 duty -->
   <section class="card hidden" data-p="3">
-    <h3>Duty data</h3>
-    <p class="hint">MKS units. Only the fields your case needs are shown.</p>
+    <div class="dutyhead"><div><h3 id="dutyTitle"></h3>
+      <p class="hint">MKS units. Only the fields this case needs are shown.</p></div>
+      <img id="dutyPic" alt="" class="dutypic"></div>
     <div class="grid" id="dutyFields"></div>
     <div class="row" style="margin-top:14px">
       <button class="btn ghost" data-go="2">← Back</button>
@@ -72,13 +79,14 @@
   <section class="card hidden" data-p="4">
     <div class="spread"><h3>Selection</h3><div id="picks"></div></div>
     <div id="dutyOut"></div>
-    <div class="tw" style="max-height:520px"><table id="resTbl">
+    <div class="tw"><table id="resTbl">
       <thead><tr><th></th><th>Model</th><th>Series</th><th class="n">Stroke mm</th><th class="n">Nm/cycle</th>
         <th class="n">Nm/h</th><th class="n">Use /str</th><th class="n">Use /h</th><th class="n">Decel m/s²</th>
         <th class="n">Force kN</th><th class="n">Eff. mass kg</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
+    <div class="row" style="margin-top:12px"><button class="btn ghost" id="showMore"></button></div>
     <div class="row" style="margin-top:14px"><button class="btn ghost" data-go="3">← Back</button>
       <button class="btn" id="toRfq" disabled>Request drawings &amp; quotation →</button>
-      <button class="btn ghost" id="printReport">Print calculation report</button></div>
+      <button class="btn ghost" id="printReport" disabled>Print this selection (A4)</button></div>
   </section>
 
   <!-- 5 rfq -->
@@ -101,6 +109,51 @@
     <div id="rfqOut"></div>
   </section>
 </div>
-<script src="config.js"></script>
-<script src="app.js"></script>
+
+<!-- ============ A4 selection report — the only thing that prints ============ -->
+<div id="report" class="a4" hidden>
+  <div class="rpt-head">
+    <div><img src="img/logo.png" alt="ADONI TECH" class="rpt-logo">
+      <div class="rpt-addr" id="rAddr"></div></div>
+    <div class="rpt-meta">
+      <div class="rpt-title">SHOCK ABSORBER SELECTION</div>
+      <div id="rMeta"></div>
+    </div>
+  </div>
+  <div class="rpt-grid">
+    <div><div class="rpt-sec">Project</div><table class="kv" id="rProject"></table></div>
+    <div><div class="rpt-sec">Application</div><table class="kv" id="rApp"></table>
+      <img id="rPic" alt="" class="rpt-pic"></div>
+  </div>
+  <div class="rpt-sec">Input data</div>
+  <table class="kv cols3" id="rInputs"></table>
+  <div class="rpt-sec">Calculation</div>
+  <table class="kv cols2" id="rCalc"></table>
+  <div class="rpt-sec">Selected model</div>
+  <table class="rpt-tbl" id="rModel"></table>
+  <div id="rFlags"></div>
+  <div class="rpt-foot">
+    <div id="rNote"></div>
+    <div class="rpt-sign"><div>Prepared by <b id="rBy"></b></div><div>For ADONI TECH</div></div>
+  </div>
+</div>
+
+<!-- ============ RFQ sent overlay ============ -->
+<div id="sentOverlay" class="overlay noprint" hidden>
+  <div class="sentbox">
+    <svg class="plane" viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">
+      <circle class="ring" cx="60" cy="60" r="46" fill="none" stroke="#F57C00" stroke-width="4"
+              stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="289"/>
+      <path class="env" d="M34 46 h52 v30 h-52 z" fill="none" stroke="#1B3160" stroke-width="3.5" stroke-linejoin="round"/>
+      <path class="flap" d="M34 46 l26 20 l26 -20" fill="none" stroke="#1B3160" stroke-width="3.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path class="tick" d="M42 61 l13 13 l24 -26" fill="none" stroke="#0E8A4D" stroke-width="6"
+            stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="60" stroke-dashoffset="60"/>
+    </svg>
+    <h3 id="sentTitle">Sending…</h3>
+    <p id="sentMsg" class="muted"></p>
+    <button class="btn ghost" id="sentClose" hidden>Close</button>
+  </div>
+</div>
+<script src="app.js?v=202608251359"></script>
 </body></html>
